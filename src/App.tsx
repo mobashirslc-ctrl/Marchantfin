@@ -350,52 +350,102 @@ function LoanForm() {
   const [formStep, setFormStep] = useState<FormStep>('form')
   const [form, setForm] = useState<FormData>({
     businessName: '', contactNo: '', address: '',
-    facebookPage: '', website: '', loanType: 'Small Business & SME', loanPurpose: 'Working capital',
+    facebookPage: '', website: '', loanType: '', loanPurpose: '',
     loanAmount: '', nidImage: null, tradeImage: null,
   })
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const nidRef = useRef<HTMLInputElement>(null)
   const tradeRef = useRef<HTMLInputElement>(null)
 
-  // ১৬টি লোন ক্যাটাগরি
-  const loanCategories = [
-    "Small Business & SME",
-    "Agricultural",
-    "Microfinance",
-    "Education",
-    "Housing & Real Estate",
-    "Consumer & Personal",
-    "Vehicle & Auto",
-    "Green & Renewable Energy",
-    "Startup & Innovation",
-    "Digital & E-Commerce",
-    "Emergency & Medical",
-    "Women Entrepreneur",
-    "Expatriate & Remittance",
-    "Debt Consolidation",
-    "Working Capital",
-    "Islamic/Shariah Compliant"
-  ];
-
-  // ক্যাটাগরিভিত্তিক লোন উদ্দেশ্য (Loan Purposes)
-  const loanPurposesMap: { [key: string]: string[] } = {
-    "Small Business & SME": ["Working capital", "Inventory purchase", "Business expansion", "Equipment purchase"],
-    "Agricultural": ["Crop production", "Livestock farming", "Agricultural equipment", "Irrigation project"],
-    "Microfinance": ["Income-generating activity", "Cottage industry", "Daily expense support"],
-    "Education": ["Tuition fees", "Higher studies abroad", "Professional certification", "Academic supplies"],
-    "Housing & Real Estate": ["Home construction", "Apartment purchase", "Home renovation", "Land purchase"],
-    "Consumer & Personal": ["Family event/Wedding", "Travel & vacation", "Debt consolidation", "Personal emergency"],
-    "Vehicle & Auto": ["Car purchase (New)", "Car purchase (Reconditioned)", "Commercial vehicle", "Two-wheeler purchase"],
-    "Green & Renewable Energy": ["Solar panel installation", "Energy-efficient appliance", "Eco-friendly business setup"],
-    "Startup & Innovation": ["Prototype development", "Product launch", "Tech infrastructure"],
-    "Digital & E-Commerce": ["Website/App development", "Digital marketing campaign", "Inventory for online store"],
-    "Emergency & Medical": ["Hospitalization & surgery", "Emergency medication", "Post-accident recovery"],
-    "Women Entrepreneur": ["Home-based boutique", "Handicrafts production", "Salon & beauty parlor", "Small enterprise startup"],
-    "Expatriate & Remittance": ["Visa/Processing fee", "Family support", "Business investment in home country"],
-    "Debt Consolidation": ["Credit card debt payoff", "Multiple loan merger", "High-interest debt clearance"],
-    "Working Capital": ["Short-term cash flow", "Payroll management", "Supplier payment"],
-    "Islamic/Shariah Compliant": ["Murabaha financing", "Ijara (Leasing)", "Musharaka partnership"]
+  // ১৬টি ক্যাটাগরি এবং প্রতিটির অধীনে লোন উদ্দেশ্যসমূহের ম্যাপিং
+  const loanCategoriesData: Record<string, string[]> = {
+    'ব্যবসার মূলধন ও ক্যাশ ফ্লো বৃদ্ধি': [
+      'চলতি মূলধন ঘাটতি পূরণ',
+      'দৈনন্দিন খরচ পরিচালনা',
+      'জরুরি ক্যাশ ফ্লো সাপোর্ট'
+    ],
+    'অনলাইন শপ বা ই-কমার্স স্টক ও ইনভেন্টরি ক্রয়': [
+      'নতুন পণ্য বা স্টক পাইকারি কেনা',
+      'আমদানিকৃত পণ্যের পেমেন্ট পরিশোধ',
+      'সিজনাল প্রোডাক্ট ইনভেন্টরি তৈরি'
+    ],
+    'ডিজিটাল মার্কেটিং ও ফেসবুক অ্যাডস বাজেট': [
+      'ফেসবুক ও ইনস্টাগ্রাম পেইড ক্যাম্পেইন',
+      'গুগল ও ইউটিউব বিজ্ঞাপন বাজেট',
+      'ব্র্যান্ড প্রমোশন ও ইনফ্লুয়েন্সার মার্কেটিং'
+    ],
+    'ওয়েবসাইট বা মোবাইল অ্যাপ ডেভেলপমেন্ট': [
+      'ই-কমার্স ওয়েবসাইট তৈরি ও আপগ্রেড',
+      'কাস্টম মোবাইল অ্যাপ ডেভেলপমেন্ট',
+      'ডোমেইন, হোস্টিং ও সফটওয়্যার লাইসেন্স'
+    ],
+    'দোকান বা শোরুমের আধুনিকায়ন ও ডেকোরেশন': [
+      'শোরুম ইন্টেরিয়র ও ডেকোরেশন',
+      'ডিসপ্লে র‍্যাক ও লাইটিংস সেটআপ',
+      'সাইনবোর্ড ও ব্র্যান্ডিং কাজ'
+    ],
+    'পাইকারি পণ্য ক্রয়ের জন্য চলতি মূলধন': [
+      'বल्क অ্যামাউন্টে পণ্য পারচেজ',
+      'সাপ্লায়ারের বকেয়া পরিশোধ ডিসকাউন্ট সুবিধা পেতে',
+      'নতুন সাপ্লায়ার নেটওয়ার্ক তৈরি'
+    ],
+    'যন্ত্রপাতি, প্রিন্টার বা অফিস সরঞ্জাম ক্রয়': [
+      'উৎপাদনমুখী মেশিনারি ক্রয়',
+      'অফিস ইকুইপমেন্ট ও কম্পিউটার সেটআপ',
+      'প্যাকেজিং বা প্রিন্টিং মেশিন ক্রয়'
+    ],
+    'পণ্য ডেলিভারি ও লজিস্টিকস সম্প্রসারণ': [
+      'ডেলিভারি ভ্যান বা বাইক ক্রয়/ভাড়া',
+      'কুরিয়ার সার্ভিস ইন্টিগ্রেশন ও ডিপোজিট',
+      'প্যাকেজিং ও শিপিং অপারেশন খরচ'
+    ],
+    'কাস্টমার সাপোর্ট ও কল সেন্টার সেটআপ': [
+      'কাস্টমার কেয়ার ডেস্ক ও হেডসেট ক্রয়',
+      'কল সেন্টার সফটওয়্যার সাবস্ক্রিপশন',
+      'সাপোর্ট টিম রিক্রুটমেন্ট ও ট্রেনিং'
+    ],
+    'ব্যবসায়িক অ্যাকাউন্ট ও সফটওয়্যার সাবস্ক্রিপশন': [
+      'ইআরপি বা অ্যাকাউন্টিং সফটওয়্যার লাইসেন্স',
+      'ক্লাউড সার্ভিস ও সিকিউরিটি টুলস',
+      'প্রিমিয়াম বিজনেস টুলস সাবস্ক্রিপশন'
+    ],
+    'প্যাকেজিং ও ব্র্যান্ডিং ম্যাটেরিয়ালস তৈরি': [
+      'কাস্টমাইজড বক্স ও পলি প্রিন্টিং',
+      'ব্র্যান্ড লেবেল ও টেপ তৈরি',
+      'ক্যাটালগ ও প্রমোশনাল লিফলেট প্রিন্ট'
+    ],
+    'কর্মচারীদের বেতন ও অপারেশনাল খরচ ব্যবস্থাপনা': [
+      'স্টাফদের মাসিক বেতন পরিশোধ',
+      'অফিস বা গোডাউন ইউটিলিটি বিল',
+      'রুটিন অপারেশনাল খরচ নির্বাহ'
+    ],
+    'স্টোরেজ বা গোডাউন ভাড়া ও রক্ষণাবেক্ষণ': [
+      'নতুন গোডাউন বা ওয়্যারহাউস অগ্রিম ভাড়া',
+      'গোডাউন রেনোভেশন ও সিকিউরিটি সেটআপ',
+      'পণ্য সংরক্ষণের সেলফ ও র‍্যাকিং'
+    ],
+    'নতুন ব্রাঞ্চ বা আউটলেট চালুকরণ': [
+      'নতুন শাখা বা শোরুমের জামানত ও অগ্রিম',
+      'শাখার প্রাথমিক স্টক ও ডেকোরেশন',
+      'শাখার উদ্বোধনী মার্কেটিং খরচ'
+    ],
+    'জরুরি ট্রেড লাইসেন্স ও ট্যাক্স কমপ্লায়েন্স ফি': [
+      'ট্রেড লাইসেন্স নবায়ন ও নতুন ফি',
+      'ট্যাক্স ও ভ্যাট সংক্রান্ত কমপ্লায়েন্স খরচ',
+      'বিজনেস সার্টিফিকেশন ও আইনি ফি'
+    ],
+    'অন্যান্য বিশেষ ব্যবসায়িক সম্প্রসারণ প্রয়োজন': [
+      'বিশেষ বিজনেস প্রজেক্ট বাস্তবায়ন',
+      'নতুন পণ্যের ট্রায়াল লঞ্চ',
+      'অন্যান্য জরুরি ব্যবসায়িক প্রয়োজন'
+    ]
   };
+
+  // ক্যাটাগরিগুলোর লিস্ট ড্রপডাউনের জন্য
+  const categories = Object.keys(loanCategoriesData);
+
+  // ক্যাটাগরি সিলেক্ট করলে তার আন্ডারে থাকা উদ্দেশ্যগুলোর লিস্ট বের করা
+  const currentPurposes = form.loanType ? loanCategoriesData[form.loanType] || [] : [];
 
   const validate = () => {
     const e: Partial<Record<keyof FormData, string>> = {}
@@ -404,7 +454,7 @@ function LoanForm() {
     else if (!/^01[3-9]\d{8}$/.test(form.contactNo.replace(/\s/g, ''))) e.contactNo = 'সঠিক বাংলাদেশ মোবাইল নম্বর দিন'
     if (!form.address.trim()) e.address = 'ঠিকানা আবশ্যক'
     if (!form.facebookPage.trim()) e.facebookPage = 'ফেসবুক পেজ লিংক আবশ্যক'
-    if (!form.loanType) e.loanType = 'লোনের ক্যাটাগরি সিলেক্ট করুন'
+    if (!form.loanType) e.loanType = 'লোনের ধরন সিলেক্ট করুন'
     if (!form.loanPurpose) e.loanPurpose = 'লোনের উদ্দেশ্য সিলেক্ট করুন'
     if (!form.loanAmount.trim()) e.loanAmount = 'লোনের পরিমাণ আবশ্যক'
     else {
@@ -421,13 +471,19 @@ function LoanForm() {
     if (!validate()) return
     setFormStep('loading')
     setTimeout(() => {
-      // ক্যাটাগরি ভিত্তিক সফল রেজাল্ট বা আপনার প্রয়োজন অনুযায়ী স্ট্যাটাস সেট করতে পারেন
       setFormStep('result-service-success')
     }, 2200)
   }
 
   const set = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm(f => ({ ...f, [k]: e.target.value }))
+    const val = e.target.value;
+    setForm(f => {
+      // যদি লোনের ধরন (category) পরিবর্তন করা হয়, তবে লোনের উদ্দেশ্য রিসেট করে দিতে হবে
+      if (k === 'loanType') {
+        return { ...f, loanType: val, loanPurpose: '' }
+      }
+      return { ...f, [k]: val }
+    })
     setErrors(er => ({ ...er, [k]: '' }))
   }
 
@@ -504,7 +560,7 @@ function LoanForm() {
 
           <div style={{ padding: '32px' }}>
             {formStep === 'form' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-fadeInUp">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                 {/* Row 1 */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   {fieldGroup('ব্যবসার নাম', 'businessName', 'text', 'আপনার ব্যবসার সম্পূর্ণ নাম')}
@@ -550,40 +606,47 @@ function LoanForm() {
                   </div>
                 </div>
 
-                {/* Row 5: Loan Category & Purpose */}
+                {/* Row 5: Dependent Dropdowns */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                  {/* Loans Category Dropdown (16 items) */}
                   <div>
-                    <label style={labelStyle}>লোনের ক্যাটাগরি<span style={{ color: '#C0392B' }}>*</span></label>
+                    <label style={labelStyle}>লোনের ধরন / ক্যাটাগরি<span style={{ color: '#C0392B' }}>*</span></label>
                     <select
                       value={form.loanType}
-                      onChange={(e) => {
-                        const selectedCategory = e.target.value;
-                        // ক্যাটাগরি পরিবর্তনের সাথে সাথে সংশ্লিষ্ট প্রথম উদ্দেশ্যটি স্বয়ংক্রয়ভাবে সেট হবে
-                        const firstPurpose = loanPurposesMap[selectedCategory]?.[0] || '';
-                        setForm(f => ({ ...f, loanType: selectedCategory, loanPurpose: firstPurpose }));
-                        setErrors(er => ({ ...er, loanType: '', loanPurpose: '' }));
-                      }}
+                      onChange={set('loanType')}
                       style={{ ...inputStyle(errors.loanType), cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C0392B' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: '36px' }}
                       onFocus={e => { e.target.style.borderColor = '#C0392B'; e.target.style.background = '#fff' }}
                       onBlur={e => { e.target.style.borderColor = errors.loanType ? '#C0392B' : '#E2E8F0'; e.target.style.background = '#FAFAFA' }}
                     >
-                      {loanCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                      <option value="">-- ক্যাটাগরি সিলেক্ট করুন --</option>
+                      {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                     {errors.loanType && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors.loanType}</p>}
                   </div>
 
+                  {/* Loan Purpose Dropdown (Depends on selected Category) */}
                   <div>
                     <label style={labelStyle} id="loanPurpose">লোনের উদ্দেশ্য<span style={{ color: '#C0392B' }}>*</span></label>
                     <select
                       id="loanPurpose"
                       value={form.loanPurpose}
                       onChange={set('loanPurpose')}
-                      style={{ ...inputStyle(errors.loanPurpose), cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C0392B' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: '36px' }}
+                      disabled={!form.loanType}
+                      style={{ 
+                        ...inputStyle(errors.loanPurpose), 
+                        cursor: form.loanType ? 'pointer' : 'not-allowed', 
+                        opacity: form.loanType ? 1 : 0.6,
+                        appearance: 'none', 
+                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C0392B' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, 
+                        backgroundRepeat: 'no-repeat', 
+                        backgroundPosition: 'right 14px center', 
+                        paddingRight: '36px' 
+                      }}
                       onFocus={e => { e.target.style.borderColor = '#C0392B'; e.target.style.background = '#fff' }}
                       onBlur={e => { e.target.style.borderColor = errors.loanPurpose ? '#C0392B' : '#E2E8F0'; e.target.style.background = '#FAFAFA' }}
                     >
-                      <option value="">-- উদ্দেশ্য সিলেক্ট করুন --</option>
-                      {(loanPurposesMap[form.loanType] || []).map(p => <option key={p} value={p}>{p}</option>)}
+                      <option value="">{form.loanType ? '-- উদ্দেশ্য সিলেক্ট করুন --' : 'আগে ক্যাটাগরি সিলেক্ট করুন'}</option>
+                      {currentPurposes.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                     {errors.loanPurpose && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors.loanPurpose}</p>}
                   </div>
@@ -703,19 +766,38 @@ function LoanForm() {
                   </div>
                 </div>
 
-                {/* Submit Button */}
+                {/* Requirement note */}
+                <div style={{
+                  background: '#FFF7ED', border: '1px solid #FED7AA',
+                  borderRadius: '10px', padding: '14px 16px',
+                  display: 'flex', gap: '10px', alignItems: 'flex-start',
+                }}>
+                  <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>ℹ️</span>
+                  <div>
+                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#92400E', marginBottom: '4px' }}>লোন সীমা সংক্রান্ত তথ্য</div>
+                    <div style={{ fontSize: '12px', color: '#78350F', lineHeight: 1.5 }}>
+                      প্রথম আবেদনে সর্বোচ্চ <strong>৳৫০,০০০</strong>। সফল ১২ মাসের EMI পরিশোধের পর সর্বোচ্চ <strong>৳১,০০,০০০</strong> পর্যন্ত ক্যাশ লোনের যোগ্যতা অর্জন করবেন।
+                    </div>
+                  </div>
+                </div>
+
+                {/* Submit */}
                 <button
                   onClick={handleSubmit}
                   style={{
-                    width: '100%', padding: '14px', borderRadius: '8px',
-                    background: 'linear-gradient(135deg, #8B0000, #C0392B)',
+                    width: '100%', padding: '16px',
+                    background: 'linear-gradient(135deg, #8B0000, #C0392B, #E74C3C)',
                     color: '#fff', fontSize: '16px', fontWeight: 700,
-                    border: 'none', cursor: 'pointer', marginTop: '10px',
-                    boxShadow: '0 4px 12px rgba(192, 57, 43, 0.3)',
-                    fontFamily: 'Hind Siliguri, sans-serif'
+                    border: 'none', borderRadius: '10px', cursor: 'pointer',
+                    fontFamily: 'Hind Siliguri, sans-serif',
+                    boxShadow: '0 4px 20px rgba(192,57,43,0.4)',
+                    transition: 'all 0.2s',
+                    letterSpacing: '0.3px',
                   }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(192,57,43,0.5)' }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(192,57,43,0.4)' }}
                 >
-                  আবেদন জমা দিন
+                  আবেদন সাবমিট করুন →
                 </button>
               </div>
             )}
