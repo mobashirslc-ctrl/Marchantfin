@@ -1,0 +1,10 @@
+{
+  "description": "Enables e-commerce merchants to apply for tailored business loans and services with easy eligibility checks and streamlined 12-month EMI repayment options.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
