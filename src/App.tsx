@@ -357,96 +357,6 @@ function LoanForm() {
   const nidRef = useRef<HTMLInputElement>(null)
   const tradeRef = useRef<HTMLInputElement>(null)
 
-  // ১৬টি ক্যাটাগরি এবং প্রতিটির অধীনে লোন উদ্দেশ্যসমূহের ম্যাপিং
-  const loanCategoriesData: Record<string, string[]> = {
-    'ব্যবসার মূলধন ও ক্যাশ ফ্লো বৃদ্ধি': [
-      'চলতি মূলধন ঘাটতি পূরণ',
-      'দৈনন্দিন খরচ পরিচালনা',
-      'জরুরি ক্যাশ ফ্লো সাপোর্ট'
-    ],
-    'অনলাইন শপ বা ই-কমার্স স্টক ও ইনভেন্টরি ক্রয়': [
-      'নতুন পণ্য বা স্টক পাইকারি কেনা',
-      'আমদানিকৃত পণ্যের পেমেন্ট পরিশোধ',
-      'সিজনাল প্রোডাক্ট ইনভেন্টরি তৈরি'
-    ],
-    'ডিজিটাল মার্কেটিং ও ফেসবুক অ্যাডস বাজেট': [
-      'ফেসবুক ও ইনস্টাগ্রাম পেইড ক্যাম্পেইন',
-      'গুগল ও ইউটিউব বিজ্ঞাপন বাজেট',
-      'ব্র্যান্ড প্রমোশন ও ইনফ্লুয়েন্সার মার্কেটিং'
-    ],
-    'ওয়েবসাইট বা মোবাইল অ্যাপ ডেভেলপমেন্ট': [
-      'ই-কমার্স ওয়েবসাইট তৈরি ও আপগ্রেড',
-      'কাস্টম মোবাইল অ্যাপ ডেভেলপমেন্ট',
-      'ডোমেইন, হোস্টিং ও সফটওয়্যার লাইসেন্স'
-    ],
-    'দোকান বা শোরুমের আধুনিকায়ন ও ডেকোরেশন': [
-      'শোরুম ইন্টেরিয়র ও ডেকোরেশন',
-      'ডিসপ্লে র‍্যাক ও লাইটিংস সেটআপ',
-      'সাইনবোর্ড ও ব্র্যান্ডিং কাজ'
-    ],
-    'পাইকারি পণ্য ক্রয়ের জন্য চলতি মূলধন': [
-      'বल्क অ্যামাউন্টে পণ্য পারচেজ',
-      'সাপ্লায়ারের বকেয়া পরিশোধ ডিসকাউন্ট সুবিধা পেতে',
-      'নতুন সাপ্লায়ার নেটওয়ার্ক তৈরি'
-    ],
-    'যন্ত্রপাতি, প্রিন্টার বা অফিস সরঞ্জাম ক্রয়': [
-      'উৎপাদনমুখী মেশিনারি ক্রয়',
-      'অফিস ইকুইপমেন্ট ও কম্পিউটার সেটআপ',
-      'প্যাকেজিং বা প্রিন্টিং মেশিন ক্রয়'
-    ],
-    'পণ্য ডেলিভারি ও লজিস্টিকস সম্প্রসারণ': [
-      'ডেলিভারি ভ্যান বা বাইক ক্রয়/ভাড়া',
-      'কুরিয়ার সার্ভিস ইন্টিগ্রেশন ও ডিপোজিট',
-      'প্যাকেজিং ও শিপিং অপারেশন খরচ'
-    ],
-    'কাস্টমার সাপোর্ট ও কল সেন্টার সেটআপ': [
-      'কাস্টমার কেয়ার ডেস্ক ও হেডসেট ক্রয়',
-      'কল সেন্টার সফটওয়্যার সাবস্ক্রিপশন',
-      'সাপোর্ট টিম রিক্রুটমেন্ট ও ট্রেনিং'
-    ],
-    'ব্যবসায়িক অ্যাকাউন্ট ও সফটওয়্যার সাবস্ক্রিপশন': [
-      'ইআরপি বা অ্যাকাউন্টিং সফটওয়্যার লাইসেন্স',
-      'ক্লাউড সার্ভিস ও সিকিউরিটি টুলস',
-      'প্রিমিয়াম বিজনেস টুলস সাবস্ক্রিপশন'
-    ],
-    'প্যাকেজিং ও ব্র্যান্ডিং ম্যাটেরিয়ালস তৈরি': [
-      'কাস্টমাইজড বক্স ও পলি প্রিন্টিং',
-      'ব্র্যান্ড লেবেল ও টেপ তৈরি',
-      'ক্যাটালগ ও প্রমোশনাল লিফলেট প্রিন্ট'
-    ],
-    'কর্মচারীদের বেতন ও অপারেশনাল খরচ ব্যবস্থাপনা': [
-      'স্টাফদের মাসিক বেতন পরিশোধ',
-      'অফিস বা গোডাউন ইউটিলিটি বিল',
-      'রুটিন অপারেশনাল খরচ নির্বাহ'
-    ],
-    'স্টোরেজ বা গোডাউন ভাড়া ও রক্ষণাবেক্ষণ': [
-      'নতুন গোডাউন বা ওয়্যারহাউস অগ্রিম ভাড়া',
-      'গোডাউন রেনোভেশন ও সিকিউরিটি সেটআপ',
-      'পণ্য সংরক্ষণের সেলফ ও র‍্যাকিং'
-    ],
-    'নতুন ব্রাঞ্চ বা আউটলেট চালুকরণ': [
-      'নতুন শাখা বা শোরুমের জামানত ও অগ্রিম',
-      'শাখার প্রাথমিক স্টক ও ডেকোরেশন',
-      'শাখার উদ্বোধনী মার্কেটিং খরচ'
-    ],
-    'জরুরি ট্রেড লাইসেন্স ও ট্যাক্স কমপ্লায়েন্স ফি': [
-      'ট্রেড লাইসেন্স নবায়ন ও নতুন ফি',
-      'ট্যাক্স ও ভ্যাট সংক্রান্ত কমপ্লায়েন্স খরচ',
-      'বিজনেস সার্টিফিকেশন ও আইনি ফি'
-    ],
-    'অন্যান্য বিশেষ ব্যবসায়িক সম্প্রসারণ প্রয়োজন': [
-      'বিশেষ বিজনেস প্রজেক্ট বাস্তবায়ন',
-      'নতুন পণ্যের ট্রায়াল লঞ্চ',
-      'অন্যান্য জরুরি ব্যবসায়িক প্রয়োজন'
-    ]
-  };
-
-  // ক্যাটাগরিগুলোর লিস্ট ড্রপডাউনের জন্য
-  const categories = Object.keys(loanCategoriesData);
-
-  // ক্যাটাগরি সিলেক্ট করলে তার আন্ডারে থাকা উদ্দেশ্যগুলোর লিস্ট বের করা
-  const currentPurposes = form.loanType ? loanCategoriesData[form.loanType] || [] : [];
-
   const validate = () => {
     const e: Partial<Record<keyof FormData, string>> = {}
     if (!form.businessName.trim()) e.businessName = 'ব্যবসার নাম আবশ্যক'
@@ -471,18 +381,25 @@ function LoanForm() {
     if (!validate()) return
     setFormStep('loading')
     setTimeout(() => {
-      setFormStep('result-service-success')
+      if (form.loanType === 'cash') {
+        setFormStep('result-cash-denied')
+      } else {
+        setFormStep('result-service-success')
+      }
     }, 2200)
   }
 
+  const handleServiceApply = () => {
+    setForm(f => ({ ...f, loanType: 'service' }))
+    setFormStep('form')
+    setTimeout(() => {
+      const purposeEl = document.getElementById('loanPurpose')
+      if (purposeEl) purposeEl.focus()
+    }, 100)
+  }
+
   const set = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const val = e.target.value;
-    setForm(f => {
-      if (k === 'loanType') {
-        return { ...f, loanType: val, loanPurpose: '' }
-      }
-      return { ...f, [k]: val }
-    })
+    setForm(f => ({ ...f, [k]: e.target.value }))
     setErrors(er => ({ ...er, [k]: '' }))
   }
 
@@ -517,6 +434,8 @@ function LoanForm() {
       {errors[key] && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors[key]}</p>}
     </div>
   )
+
+  const purposes = ['Website Development', 'Digital Marketing', 'App Development', 'Customer Support Setup', 'Inventory Purchase', 'Equipment & Machinery']
 
   return (
     <section id="apply" style={{ padding: '80px 24px', background: '#F8FAFC' }}>
@@ -559,7 +478,7 @@ function LoanForm() {
 
           <div style={{ padding: '32px' }}>
             {formStep === 'form' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} className="animate-fadeInUp">
                 {/* Row 1 */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   {fieldGroup('ব্যবসার নাম', 'businessName', 'text', 'আপনার ব্যবসার সম্পূর্ণ নাম')}
@@ -605,11 +524,10 @@ function LoanForm() {
                   </div>
                 </div>
 
-                {/* Row 5: Dependent Dropdowns */}
+                {/* Row 5 */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-                  {/* Loans Category Dropdown (16 items) */}
                   <div>
-                    <label style={labelStyle}>লোনের ধরন / ক্যাটাগরি<span style={{ color: '#C0392B' }}>*</span></label>
+                    <label style={labelStyle}>লোনের ধরন<span style={{ color: '#C0392B' }}>*</span></label>
                     <select
                       value={form.loanType}
                       onChange={set('loanType')}
@@ -617,35 +535,25 @@ function LoanForm() {
                       onFocus={e => { e.target.style.borderColor = '#C0392B'; e.target.style.background = '#fff' }}
                       onBlur={e => { e.target.style.borderColor = errors.loanType ? '#C0392B' : '#E2E8F0'; e.target.style.background = '#FAFAFA' }}
                     >
-                      <option value="">-- ক্যাটাগরি সিলেক্ট করুন --</option>
-                      {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                      <option value="">-- সিলেক্ট করুন --</option>
+                      <option value="cash">💰 Cash Loan (নগদ লোন)</option>
+                      <option value="service">🛠️ Service Loan (সার্ভিস লোন)</option>
                     </select>
                     {errors.loanType && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors.loanType}</p>}
                   </div>
 
-                  {/* Loan Purpose Dropdown (Depends on selected Category) */}
                   <div>
                     <label style={labelStyle} id="loanPurpose">লোনের উদ্দেশ্য<span style={{ color: '#C0392B' }}>*</span></label>
                     <select
                       id="loanPurpose"
                       value={form.loanPurpose}
                       onChange={set('loanPurpose')}
-                      disabled={!form.loanType}
-                      style={{ 
-                        ...inputStyle(errors.loanPurpose), 
-                        cursor: form.loanType ? 'pointer' : 'not-allowed', 
-                        opacity: form.loanType ? 1 : 0.6,
-                        appearance: 'none', 
-                        backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C0392B' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, 
-                        backgroundRepeat: 'no-repeat', 
-                        backgroundPosition: 'right 14px center', 
-                        paddingRight: '36px' 
-                      }}
+                      style={{ ...inputStyle(errors.loanPurpose), cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C0392B' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: '36px' }}
                       onFocus={e => { e.target.style.borderColor = '#C0392B'; e.target.style.background = '#fff' }}
                       onBlur={e => { e.target.style.borderColor = errors.loanPurpose ? '#C0392B' : '#E2E8F0'; e.target.style.background = '#FAFAFA' }}
                     >
-                      <option value="">{form.loanType ? '-- উদ্দেশ্য সিলেক্ট করুন --' : 'আগে ক্যাটাগরি সিলেক্ট করুন'}</option>
-                      {currentPurposes.map(p => <option key={p} value={p}>{p}</option>)}
+                      <option value="">-- উদ্দেশ্য সিলেক্ট করুন --</option>
+                      {purposes.map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                     {errors.loanPurpose && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors.loanPurpose}</p>}
                   </div>
@@ -800,12 +708,7 @@ function LoanForm() {
                 </button>
               </div>
             )}
-          </div>
-        </div>
-      </div>
-    </section>
-  )
-}
+
             {/* Loading */}
             {formStep === 'loading' && (
               <div style={{ textAlign: 'center', padding: '60px 20px' }} className="animate-fadeInUp">
