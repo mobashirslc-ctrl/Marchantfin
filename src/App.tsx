@@ -350,12 +350,52 @@ function LoanForm() {
   const [formStep, setFormStep] = useState<FormStep>('form')
   const [form, setForm] = useState<FormData>({
     businessName: '', contactNo: '', address: '',
-    facebookPage: '', website: '', loanType: '', loanPurpose: '',
+    facebookPage: '', website: '', loanType: 'Small Business & SME', loanPurpose: 'Working capital',
     loanAmount: '', nidImage: null, tradeImage: null,
   })
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, string>>>({})
   const nidRef = useRef<HTMLInputElement>(null)
   const tradeRef = useRef<HTMLInputElement>(null)
+
+  // ১৬টি লোন ক্যাটাগরি
+  const loanCategories = [
+    "Small Business & SME",
+    "Agricultural",
+    "Microfinance",
+    "Education",
+    "Housing & Real Estate",
+    "Consumer & Personal",
+    "Vehicle & Auto",
+    "Green & Renewable Energy",
+    "Startup & Innovation",
+    "Digital & E-Commerce",
+    "Emergency & Medical",
+    "Women Entrepreneur",
+    "Expatriate & Remittance",
+    "Debt Consolidation",
+    "Working Capital",
+    "Islamic/Shariah Compliant"
+  ];
+
+  // ক্যাটাগরিভিত্তিক লোন উদ্দেশ্য (Loan Purposes)
+  const loanPurposesMap: { [key: string]: string[] } = {
+    "Small Business & SME": ["Working capital", "Inventory purchase", "Business expansion", "Equipment purchase"],
+    "Agricultural": ["Crop production", "Livestock farming", "Agricultural equipment", "Irrigation project"],
+    "Microfinance": ["Income-generating activity", "Cottage industry", "Daily expense support"],
+    "Education": ["Tuition fees", "Higher studies abroad", "Professional certification", "Academic supplies"],
+    "Housing & Real Estate": ["Home construction", "Apartment purchase", "Home renovation", "Land purchase"],
+    "Consumer & Personal": ["Family event/Wedding", "Travel & vacation", "Debt consolidation", "Personal emergency"],
+    "Vehicle & Auto": ["Car purchase (New)", "Car purchase (Reconditioned)", "Commercial vehicle", "Two-wheeler purchase"],
+    "Green & Renewable Energy": ["Solar panel installation", "Energy-efficient appliance", "Eco-friendly business setup"],
+    "Startup & Innovation": ["Prototype development", "Product launch", "Tech infrastructure"],
+    "Digital & E-Commerce": ["Website/App development", "Digital marketing campaign", "Inventory for online store"],
+    "Emergency & Medical": ["Hospitalization & surgery", "Emergency medication", "Post-accident recovery"],
+    "Women Entrepreneur": ["Home-based boutique", "Handicrafts production", "Salon & beauty parlor", "Small enterprise startup"],
+    "Expatriate & Remittance": ["Visa/Processing fee", "Family support", "Business investment in home country"],
+    "Debt Consolidation": ["Credit card debt payoff", "Multiple loan merger", "High-interest debt clearance"],
+    "Working Capital": ["Short-term cash flow", "Payroll management", "Supplier payment"],
+    "Islamic/Shariah Compliant": ["Murabaha financing", "Ijara (Leasing)", "Musharaka partnership"]
+  };
 
   const validate = () => {
     const e: Partial<Record<keyof FormData, string>> = {}
@@ -364,7 +404,7 @@ function LoanForm() {
     else if (!/^01[3-9]\d{8}$/.test(form.contactNo.replace(/\s/g, ''))) e.contactNo = 'সঠিক বাংলাদেশ মোবাইল নম্বর দিন'
     if (!form.address.trim()) e.address = 'ঠিকানা আবশ্যক'
     if (!form.facebookPage.trim()) e.facebookPage = 'ফেসবুক পেজ লিংক আবশ্যক'
-    if (!form.loanType) e.loanType = 'লোনের ধরন সিলেক্ট করুন'
+    if (!form.loanType) e.loanType = 'লোনের ক্যাটাগরি সিলেক্ট করুন'
     if (!form.loanPurpose) e.loanPurpose = 'লোনের উদ্দেশ্য সিলেক্ট করুন'
     if (!form.loanAmount.trim()) e.loanAmount = 'লোনের পরিমাণ আবশ্যক'
     else {
@@ -381,21 +421,9 @@ function LoanForm() {
     if (!validate()) return
     setFormStep('loading')
     setTimeout(() => {
-      if (form.loanType === 'cash') {
-        setFormStep('result-cash-denied')
-      } else {
-        setFormStep('result-service-success')
-      }
+      // ক্যাটাগরি ভিত্তিক সফল রেজাল্ট বা আপনার প্রয়োজন অনুযায়ী স্ট্যাটাস সেট করতে পারেন
+      setFormStep('result-service-success')
     }, 2200)
-  }
-
-  const handleServiceApply = () => {
-    setForm(f => ({ ...f, loanType: 'service' }))
-    setFormStep('form')
-    setTimeout(() => {
-      const purposeEl = document.getElementById('loanPurpose')
-      if (purposeEl) purposeEl.focus()
-    }, 100)
   }
 
   const set = (k: keyof FormData) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -434,8 +462,6 @@ function LoanForm() {
       {errors[key] && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors[key]}</p>}
     </div>
   )
-
-  const purposes = ['Website Development', 'Digital Marketing', 'App Development', 'Customer Support Setup', 'Inventory Purchase', 'Equipment & Machinery']
 
   return (
     <section id="apply" style={{ padding: '80px 24px', background: '#F8FAFC' }}>
@@ -524,20 +550,24 @@ function LoanForm() {
                   </div>
                 </div>
 
-                {/* Row 5 */}
+                {/* Row 5: Loan Category & Purpose */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                   <div>
-                    <label style={labelStyle}>লোনের ধরন<span style={{ color: '#C0392B' }}>*</span></label>
+                    <label style={labelStyle}>লোনের ক্যাটাগরি<span style={{ color: '#C0392B' }}>*</span></label>
                     <select
                       value={form.loanType}
-                      onChange={set('loanType')}
+                      onChange={(e) => {
+                        const selectedCategory = e.target.value;
+                        // ক্যাটাগরি পরিবর্তনের সাথে সাথে সংশ্লিষ্ট প্রথম উদ্দেশ্যটি স্বয়ংক্রয়ভাবে সেট হবে
+                        const firstPurpose = loanPurposesMap[selectedCategory]?.[0] || '';
+                        setForm(f => ({ ...f, loanType: selectedCategory, loanPurpose: firstPurpose }));
+                        setErrors(er => ({ ...er, loanType: '', loanPurpose: '' }));
+                      }}
                       style={{ ...inputStyle(errors.loanType), cursor: 'pointer', appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23C0392B' stroke-width='2' fill='none'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: '36px' }}
                       onFocus={e => { e.target.style.borderColor = '#C0392B'; e.target.style.background = '#fff' }}
                       onBlur={e => { e.target.style.borderColor = errors.loanType ? '#C0392B' : '#E2E8F0'; e.target.style.background = '#FAFAFA' }}
                     >
-                      <option value="">-- সিলেক্ট করুন --</option>
-                      <option value="cash">💰 Cash Loan (নগদ লোন)</option>
-                      <option value="service">🛠️ Service Loan (সার্ভিস লোন)</option>
+                      {loanCategories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                     </select>
                     {errors.loanType && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors.loanType}</p>}
                   </div>
@@ -553,7 +583,7 @@ function LoanForm() {
                       onBlur={e => { e.target.style.borderColor = errors.loanPurpose ? '#C0392B' : '#E2E8F0'; e.target.style.background = '#FAFAFA' }}
                     >
                       <option value="">-- উদ্দেশ্য সিলেক্ট করুন --</option>
-                      {purposes.map(p => <option key={p} value={p}>{p}</option>)}
+                      {(loanPurposesMap[form.loanType] || []).map(p => <option key={p} value={p}>{p}</option>)}
                     </select>
                     {errors.loanPurpose && <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#C0392B' }}>{errors.loanPurpose}</p>}
                   </div>
@@ -673,42 +703,28 @@ function LoanForm() {
                   </div>
                 </div>
 
-                {/* Requirement note */}
-                <div style={{
-                  background: '#FFF7ED', border: '1px solid #FED7AA',
-                  borderRadius: '10px', padding: '14px 16px',
-                  display: 'flex', gap: '10px', alignItems: 'flex-start',
-                }}>
-                  <span style={{ fontSize: '16px', flexShrink: 0, marginTop: '1px' }}>ℹ️</span>
-                  <div>
-                    <div style={{ fontSize: '13px', fontWeight: 600, color: '#92400E', marginBottom: '4px' }}>লোন সীমা সংক্রান্ত তথ্য</div>
-                    <div style={{ fontSize: '12px', color: '#78350F', lineHeight: 1.5 }}>
-                      প্রথম আবেদনে সর্বোচ্চ <strong>৳৫০,০০০</strong>। সফল ১২ মাসের EMI পরিশোধের পর সর্বোচ্চ <strong>৳১,০০,০০০</strong> পর্যন্ত ক্যাশ লোনের যোগ্যতা অর্জন করবেন।
-                    </div>
-                  </div>
-                </div>
-
-                {/* Submit */}
+                {/* Submit Button */}
                 <button
                   onClick={handleSubmit}
                   style={{
-                    width: '100%', padding: '16px',
-                    background: 'linear-gradient(135deg, #8B0000, #C0392B, #E74C3C)',
+                    width: '100%', padding: '14px', borderRadius: '8px',
+                    background: 'linear-gradient(135deg, #8B0000, #C0392B)',
                     color: '#fff', fontSize: '16px', fontWeight: 700,
-                    border: 'none', borderRadius: '10px', cursor: 'pointer',
-                    fontFamily: 'Hind Siliguri, sans-serif',
-                    boxShadow: '0 4px 20px rgba(192,57,43,0.4)',
-                    transition: 'all 0.2s',
-                    letterSpacing: '0.3px',
+                    border: 'none', cursor: 'pointer', marginTop: '10px',
+                    boxShadow: '0 4px 12px rgba(192, 57, 43, 0.3)',
+                    fontFamily: 'Hind Siliguri, sans-serif'
                   }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(192,57,43,0.5)' }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(192,57,43,0.4)' }}
                 >
-                  আবেদন সাবমিট করুন →
+                  আবেদন জমা দিন
                 </button>
               </div>
             )}
-
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
             {/* Loading */}
             {formStep === 'loading' && (
               <div style={{ textAlign: 'center', padding: '60px 20px' }} className="animate-fadeInUp">
